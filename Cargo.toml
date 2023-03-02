@@ -1,0 +1,22 @@
+[package]
+name = "SMTools"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+binaryninja = { git = "https://github.com/Vector35/binaryninja-api.git", branch = "dev" }
+log = { version = "0.4", features = ["std", "serde"] }
+
+[profile.dev]
+opt-level = 1
+debug = 2
+
+[profile.release]
+opt-level = 3
+debug = 2
+lto = "fat"
