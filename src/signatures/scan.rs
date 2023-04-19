@@ -1,4 +1,7 @@
 use binaryninja::binaryview::{BinaryView, BinaryViewBase, BinaryViewExt};
+use binaryninja::interaction::show_message_box;
+use log::warn;
+use crate::utils::function::read_view;
 
 use super::sigbyte::SigByte;
 
@@ -29,13 +32,15 @@ pub fn sig_matches(signature: &Vec<SigByte>, buffer: &Vec<u8>, offset: u64) -> b
 }
 
 pub fn find_signature(signature: &Vec<SigByte>, view: &BinaryView, maxmatches: usize) -> Vec<u64> {
-    let buf = view.read_vec(view.start(), view.len());
+    let buf = read_view(view);
 
     let mut matches = Vec::new();
 
     for address in 0..(buf.len() - (signature.len()) - 1) as u64 {
-        if (sig_matches(signature, buf.as_ref(), address)) {
-            matches.push(address + view.start());
+        let real_address = address + view.start();
+        if (sig_matches(signature, buf.as_ref(), real_address)) {
+            show_message_box("Match!", address.to_string(), Info)
+            matches.push(real_address);
 
             if (matches.len() >= maxmatches) {
                 //  Cut search short early
@@ -43,6 +48,7 @@ pub fn find_signature(signature: &Vec<SigByte>, view: &BinaryView, maxmatches: u
             }
         }
     }
+
 
     return matches;
 }

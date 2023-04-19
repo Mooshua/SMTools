@@ -2,25 +2,31 @@
 //  Linear generate:
 //  Linearly iterate over memory to generate a signature in near O(n) time.
 
+use std::io::{Read, Seek, SeekFrom};
+use binaryninja::binaryreader::BinaryReader;
 use binaryninja::binaryview::{BinaryView, BinaryViewBase, BinaryViewExt};
 use binaryninja::function::Function;
 use binaryninja::interaction::show_message_box;
 use binaryninja::rc;
-use log::warn;
+use log::{error, info, warn};
 use crate::SigByte;
 use crate::signatures::generate::consume_instruction;
 use crate::signatures::scan::sig_matches;
-use crate::utils::function::find_func_end;
+use crate::utils::function::{find_func_end, read_view};
 
 pub fn linear_generate_signature(view: &BinaryView, sig_address: u64, func: rc::Ref<Function>) -> Result<Vec<SigByte>, String> {
-    let buf = view.read_vec(view.start(), view.len());
+
+    let buf = read_view(view);
+
     let mut sig: Vec<SigByte> = Vec::new();
     let mut func_end = find_func_end(&func);
 
 
     for address in 0..(buf.len() - (sig.len()) - 1) as u64 {
 
-        if address == sig_address
+        let real_address = address + view.start();
+
+        if real_address == sig_address
         {
             continue;
         }

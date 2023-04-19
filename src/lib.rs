@@ -16,7 +16,7 @@ use binaryninja::{
     rc,
     string::BnString,
 };
-use binaryninja::command::{Command, FunctionCommand, register, register_for_function};
+use binaryninja::command::{Command, FunctionCommand, register, register_for_function, register_for_range};
 use binaryninja::interaction::get_text_line_input;
 use log::{debug, error, info, warn, LevelFilter};
 use monkey::{
@@ -78,6 +78,11 @@ impl Command for FindSignatureCommand {
                         info!("[SMTools] Parsed signature! {0:?}", sig);
                         let matches = find_signature(&sig, view, 50);
                         info!("[SMTools] First 50 matches:");
+                        if matches.len() == 0
+                        {
+                            log::warn!("[SMTools] No matches!");
+                        }
+
                         for sig_match in matches.into_iter() {
                             let func_scan = find_address_base(view, sig_match);
                             match func_scan

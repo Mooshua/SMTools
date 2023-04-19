@@ -57,7 +57,14 @@ pub fn consume_instruction<'a>(base: &Function, view: &BinaryView, offset: u64) 
 
             if (wildcard >= size)
             {
-                return Err(format!("Invalid instruction const parameters: Wildcard size is {0}, exceeding instruction size {1}.", wildcard, size));
+                if wildcard == 8 {
+                    warn!("Narrowing 8-byte to wildcard! THIS MAY BE INVALID!");
+                    wildcard = 4;
+                }
+                else
+                {
+                    return Err(format!("Invalid instruction const parameters: Wildcard size is {0}, exceeding instruction size {1}.", wildcard, size));
+                }
             }
 
             for index in 0..(size - wildcard) {
